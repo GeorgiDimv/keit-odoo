@@ -1,0 +1,10 @@
+[Unit]
+Description=Odoo (KEIT) daily backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+# Adjust this path if the repo lives elsewhere than /home/edwin/Odoo
+WorkingDirectory=/home/edwin/Odoo
+ExecStart=/home/edwin/Odoo/scripts/backup.sh
