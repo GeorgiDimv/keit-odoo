@@ -1,0 +1,15 @@
+# Internal-only — never ship to the customer
+_internal/
+
+# Regenerated on the target via `make oca` — don't ship 398 MB of vendored code
+addons/
+
+# Real secrets — ship .env.example instead
+.env
+
+# Run logs / transient
+*.log
+
+# Odoo / Python noise
+__pycache__/
+*.pyc

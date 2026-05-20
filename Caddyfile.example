@@ -1,0 +1,43 @@
+# Caddy reverse proxy for Odoo — copy to ./Caddyfile and edit the hostname.
+# Caddy auto-obtains + renews a Let's Encrypt certificate for this name.
+#
+# Requires: KEIT's IT has pointed odoo.keit.bg (A record) at this VM.
+
+odoo.keit.bg {
+	# Main Odoo web
+	reverse_proxy odoo:8069
+
+	# Long-polling / websocket (chat, live notifications) on 8072
+	@longpoll path /longpolling/* /websocket/*
+	reverse_proxy @longpoll odoo:8072
+
+	# Security headers
+	header {
+		Strict-Transport-Security "max-age=31536000;"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		-Server
+	}
+
+	# Reasonable upload size for attachments/imports
+	request_body {
+		max_size 100MB
+	}
+
+	encode gzip zstd
+}
+
+# --- Internal-only deployment (no public IP, can't use Let's Encrypt HTTP) ---
+# If the VM has no public IP, use one of:
+#   (a) Let's Encrypt DNS-01 challenge (needs a DNS provider plugin), or
+#   (b) Caddy's internal CA (self-signed) — replace the block above with:
+#
+# odoo.keit.bg {
+#     tls internal
+#     reverse_proxy odoo:8069
+#     @longpoll path /longpolling/* /websocket/*
+#     reverse_proxy @longpoll odoo:8072
+# }
+#
+# With `tls internal`, import Caddy's root CA onto client machines to avoid
+# browser warnings (Caddy prints the root CA path in its logs).
